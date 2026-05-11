@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total": 124,
+    "total": 125,
     "skipped": 2,
     "enriched": 0,
     "date_range": {
@@ -35,7 +35,7 @@
     "confirmed_actions": [
       {
         "topic": "agents",
-        "count": 45,
+        "count": 46,
         "articles": [
           "2026-04-22-claude-routines-explained-13-business-automations-youtube",
           "2026-04-22-claude-code-as-full-video-production-studio-openmontage",
@@ -81,9 +81,10 @@
           "2026-05-10-context-os-for-ai-business-built-in-notion",
           "2026-05-11-vibe-coding-30-days-200h-70k-lines",
           "2026-05-11-markdown-is-not-the-agent-god-format-anymore-html-is-back",
-          "2026-05-11-anthropic-launches-financial-services-agent-repo"
+          "2026-05-11-anthropic-launches-financial-services-agent-repo",
+          "2026-05-11-karpathys-12-rule-claudemd-cuts-mistakes-to-3"
         ],
-        "verdict": "RECURRING THEME — 45 articles tagged 'agents'"
+        "verdict": "RECURRING THEME — 46 articles tagged 'agents'"
       },
       {
         "topic": "tools",
@@ -4603,6 +4604,47 @@
         "agents",
         "anthropic",
         "skills"
+      ],
+      "skipped": false,
+      "enriched": false,
+      "our_setup": {
+        "working": [],
+        "partial": [],
+        "missing": []
+      },
+      "actions": [],
+      "conflicts": [],
+      "breaking_risk": "none"
+    },
+    {
+      "id": "2026-05-11-karpathys-12-rule-claudemd-cuts-mistakes-to-3",
+      "date": "2026-05-11",
+      "title": "Karpathy's 12-Rule CLAUDE.md Cuts Mistakes to 3%",
+      "subreddit": "r/AskVibecoders",
+      "score": 31,
+      "comments": 12,
+      "url": "https://www.reddit.com/r/AskVibecoders/comments/1ta7yr8/",
+      "essence": "Karpathy expanded his original 4-rule CLAUDE.md to 12 rules over 30 codebases across 6 weeks, dropping mistake rate from 41% (baseline) → 11% (4 rules) → 3% (12 rules). The 8 new rules target agent-loop failures: silent blending of contradictory patterns, LLM used for deterministic decisions, missing read-before-write discipline, tests that verify existence not intent, and no per-step checkpointing. Hard ceiling: >200 lines of CLAUDE.md degrades compliance.",
+      "links": [
+        {
+          "url": "https://www.reddit.com/r/AskVibecoders/comments/1ta7yr8/",
+          "desc": "original thread"
+        }
+      ],
+      "gold_comments": [
+        {
+          "author": "Best_Volume_3126",
+          "quote": "41% → 11% → 3% mistake rate. The jump from 4 to 12 rules costs 2pp compliance but saves 8pp mistakes.",
+          "annotation": "the ROI of adding rules is positive until you hit the 200-line ceiling"
+        },
+        {
+          "author": "witty_otter_9",
+          "quote": "The LLM-for-judgment-only rule is the hardest to enforce — it requires knowing in advance which decisions are deterministic",
+          "annotation": "needs explicit code-review gate, not just a rule statement"
+        }
+      ],
+      "tags": [
+        "agents"
       ],
       "skipped": false,
       "enriched": false,
