@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total": 125,
+    "total": 126,
     "skipped": 2,
     "enriched": 0,
     "date_range": {
@@ -4646,6 +4646,53 @@
       "tags": [
         "agents"
       ],
+      "skipped": false,
+      "enriched": false,
+      "our_setup": {
+        "working": [],
+        "partial": [],
+        "missing": []
+      },
+      "actions": [],
+      "conflicts": [],
+      "breaking_risk": "none"
+    },
+    {
+      "id": "2026-05-11-built-10-client-websites-in-4-months-workflow-to-avoid-ai-look",
+      "date": "2026-05-11",
+      "title": "Built 10 Client Websites in 4 Months — Workflow to Avoid AI Look",
+      "subreddit": "r/webdesign",
+      "score": 18,
+      "comments": 16,
+      "url": "https://www.reddit.com/r/webdesign/comments/1tab7tz/",
+      "essence": "AI produces generic \"slop\" websites (same gradients, same Inter font, same card layouts) because it has no direction — not because AI is bad at design. The fix is a 4-step workflow: (1) obsessive research before touching code, (2) sketch/commit to visual direction before building, (3) build an 11-section Implementation.md doc by prompting AI to ask questions, (4) build the full component system before building the site. The doc + component-first approach prevents AI from going random mid-build.",
+      "links": [
+        {
+          "url": "https://mobbin.com",
+          "desc": "real app screens by category/pattern (better than Pinterest for UI reference)"
+        },
+        {
+          "url": "https://framer.com/templates",
+          "desc": "landing page direction/vibe references"
+        },
+        {
+          "url": "https://uicraft.app",
+          "desc": "component systems for client builds"
+        }
+      ],
+      "gold_comments": [
+        {
+          "author": "dennisplucinik",
+          "quote": "Sounds like you've stumbled on the workflow professional designers have been using for decades.",
+          "annotation": "the steps aren't new, but applying them to AI-driven builds is the gap most people miss"
+        },
+        {
+          "author": "SampleUpbeat8538",
+          "quote": "locking down the component system first saves so much pain later on. AI will literally just hallucinate random tailwind classes if you let it freestyle the UI without strict docs",
+          "annotation": "confirms Implementation.md + component-first as the key levers"
+        }
+      ],
+      "tags": [],
       "skipped": false,
       "enriched": false,
       "our_setup": {
