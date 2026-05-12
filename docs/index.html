@@ -668,6 +668,128 @@ select:focus { border-color: var(--accent); }
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── ACTION BUTTONS ─────────────────────────────────────────── */
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.action-btn:hover { border-color: var(--accent); color: var(--text); }
+
+.action-btn.idea-btn:hover { border-color: var(--gold); color: var(--gold); }
+.action-btn.project-btn:hover { border-color: var(--green); color: var(--green); }
+
+.action-btn.active-idea { background: rgba(246,201,14,0.1); border-color: var(--gold); color: var(--gold); }
+.action-btn.active-project { background: rgba(72,187,120,0.1); border-color: var(--green); color: var(--green); }
+
+.card-action-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.dot-idea { background: var(--gold); }
+.dot-project { background: var(--green); }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── MOBILE ─────────────────────────────────────────── */
+#mobile-tabs {
+  display: none;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.mob-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.mob-tab.active { color: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 640px) {
+  body { overflow: auto; }
+
+  #mobile-tabs { display: flex; }
+
+  #main {
+    flex-direction: column;
+    overflow: visible;
+    flex: none;
+  }
+
+  #list-panel {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  #detail-panel {
+    min-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #list-panel.mob-hidden { display: none; }
+  #detail-panel.mob-hidden { display: none; }
+
+  #bottom-panel { display: none; }
+
+  .detail-actions { gap: 6px; }
+  .action-btn { padding: 8px 12px; font-size: 12px; }
+
+  .detail-title { font-size: 17px; }
+
+  #toolbar { padding: 6px 10px; gap: 6px; }
+  #toolbar select { font-size: 12px; }
+}
 </style>
 </head>
 <body>
@@ -724,6 +846,12 @@ select:focus { border-color: var(--accent); }
     <span id="count-label">Loading…</span>
   </div>
 
+  <!-- Mobile tabs (hidden on desktop) -->
+  <div id="mobile-tabs">
+    <div class="mob-tab active" id="mob-tab-list" onclick="setMobTab('list')">📋 Articles</div>
+    <div class="mob-tab" id="mob-tab-detail" onclick="setMobTab('detail')">📖 Detail</div>
+  </div>
+
   <!-- Main split -->
   <div id="main">
     <!-- Left: article list -->
@@ -752,6 +880,7 @@ select:focus { border-color: var(--accent); }
   </div>
 
 </div><!-- /app -->
+<div id="toast"></div>
 
 <script>
 'use strict';
@@ -764,6 +893,98 @@ let filterSearch = '';
 let filterTag = '';
 let filterConflicts = false;
 let sortMode = 'date-desc';
+
+// ── IDEAS / PROJECTS STORE (localStorage) ──────────────────────────
+const STORE_KEY = 'kevin-digest-saved';
+
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch { return {}; }
+}
+
+function saveStore(store) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+}
+
+function getArticleStatus(id) {
+  const store = loadStore();
+  return store[id] ? store[id].status : null; // 'idea' | 'project' | null
+}
+
+function setArticleStatus(article, status) {
+  const store = loadStore();
+  const prev = store[article.id] ? store[article.id].status : null;
+  if (prev === status) {
+    // Toggle off
+    delete store[article.id];
+    saveStore(store);
+    return null;
+  }
+  store[article.id] = {
+    status,
+    title: article.title,
+    url: article.url || '',
+    essence: article.essence || '',
+    tags: article.tags || [],
+    date: article.date,
+    savedAt: new Date().toISOString()
+  };
+  saveStore(store);
+  return status;
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function handleActionBtn(articleId, status) {
+  const article = allArticles.find(a => a.id === articleId);
+  if (!article) return;
+  const result = setArticleStatus(article, status);
+  if (result) {
+    showToast(status === 'idea' ? '💡 Added to Ideas to Explore' : '🚀 Added to Projects');
+  } else {
+    showToast('Removed from saved');
+  }
+  // Refresh detail panel and card dot
+  selectArticle(articleId, false);
+  const card = listPanel.querySelector(`[data-id="${articleId}"]`);
+  if (card) updateCardDot(card, articleId);
+}
+
+function updateCardDot(card, id) {
+  const status = getArticleStatus(id);
+  let dot = card.querySelector('.card-action-dot');
+  if (!dot) {
+    dot = document.createElement('span');
+    dot.className = 'card-action-dot';
+    const footer = card.querySelector('.card-footer');
+    if (footer) footer.appendChild(dot);
+  }
+  dot.className = 'card-action-dot';
+  if (status === 'idea') dot.classList.add('dot-idea');
+  else if (status === 'project') dot.classList.add('dot-project');
+  else dot.style.display = 'none';
+  if (status) dot.style.display = '';
+}
+
+// ── MOBILE TABS ────────────────────────────────────────────────────
+let mobTab = 'list';
+function setMobTab(tab) {
+  mobTab = tab;
+  const listPanel = document.getElementById('list-panel');
+  const detailPanel = document.getElementById('detail-panel');
+  document.getElementById('mob-tab-list').classList.toggle('active', tab === 'list');
+  document.getElementById('mob-tab-detail').classList.toggle('active', tab === 'detail');
+  if (window.innerWidth <= 640) {
+    listPanel.classList.toggle('mob-hidden', tab !== 'list');
+    detailPanel.classList.toggle('mob-hidden', tab !== 'detail');
+  }
+}
 
 // ── DOM refs ───────────────────────────────────────────────────────
 const listPanel      = document.getElementById('list-panel');
@@ -948,11 +1169,22 @@ function buildCard(article) {
     <div class="card-footer">
       ${article.enriched ? buildRiskBadge(article.breaking_risk) : ''}
       ${hasConflicts ? '<span class="conflict-icon" title="Has conflicts">⚡</span>' : ''}
+      ${buildCardDot(article.id)}
     </div>
   `;
 
-  card.addEventListener('click', () => selectArticle(article.id, true));
+  card.addEventListener('click', () => {
+    selectArticle(article.id, true);
+    if (window.innerWidth <= 640) setMobTab('detail');
+  });
   return card;
+}
+
+function buildCardDot(id) {
+  const status = getArticleStatus(id);
+  if (!status) return '';
+  const cls = status === 'idea' ? 'dot-idea' : 'dot-project';
+  return `<span class="card-action-dot ${cls}" title="${status === 'idea' ? 'In Ideas' : 'In Projects'}"></span>`;
 }
 
 function buildTagPills(tags) {
@@ -1013,6 +1245,21 @@ function buildDetail(a) {
   const autoCollapseLinks = (a.links || []).length > 3;
 
   let html = `<div class="detail-content">`;
+
+  // Action buttons
+  const curStatus = getArticleStatus(a.id);
+  const ideaActive = curStatus === 'idea';
+  const projActive = curStatus === 'project';
+  html += `<div class="detail-actions">
+    <button class="action-btn idea-btn${ideaActive ? ' active-idea' : ''}"
+      onclick="handleActionBtn('${esc(a.id)}', 'idea')">
+      💡 ${ideaActive ? 'In Ideas ✓' : 'Ideas to Explore'}
+    </button>
+    <button class="action-btn project-btn${projActive ? ' active-project' : ''}"
+      onclick="handleActionBtn('${esc(a.id)}', 'project')">
+      🚀 ${projActive ? 'In Projects ✓' : 'Add to Projects'}
+    </button>
+  </div>`;
 
   // Skipped banner
   if (a.skipped) {
