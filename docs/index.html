@@ -1069,6 +1069,9 @@ function boot(data) {
 
   // Render
   renderList();
+
+  // On mobile: start on Articles tab (hides detail panel until user clicks)
+  if (window.innerWidth <= 640) setMobTab('list');
 }
 
 // ── FILTERING / SORTING ────────────────────────────────────────────
@@ -1338,14 +1341,14 @@ function buildDetail(a) {
     html += `</div>`;
   }
 
-  // Key Links (collapsible if > 3)
+  // Key Links (always open by default)
   if (hasLinks) {
     html += `<div class="detail-section">
-      <div class="collapsible-header${autoCollapseLinks ? '' : ' open'}">
+      <div class="collapsible-header open">
         <div class="detail-section-title">🔗 Key Links (${a.links.length})</div>
         <span class="chevron">▲</span>
       </div>
-      <div class="collapsible-body${autoCollapseLinks ? '' : ' open'}">`;
+      <div class="collapsible-body open">`;
     (a.links || []).forEach(link => {
       html += `<div class="link-item">
         <div>
@@ -1357,14 +1360,14 @@ function buildDetail(a) {
     html += `</div></div>`;
   }
 
-  // Gold comments (collapsible, collapsed by default)
+  // Gold comments (open by default)
   if (hasGold) {
     html += `<div class="detail-section">
-      <div class="collapsible-header">
+      <div class="collapsible-header open">
         <div class="detail-section-title">⭐ Gold Comments (${a.gold_comments.length})</div>
         <span class="chevron">▲</span>
       </div>
-      <div class="collapsible-body">`;
+      <div class="collapsible-body open">`;
     (a.gold_comments || []).forEach(gc => {
       html += `<div class="gold-comment">
         ${gc.author ? `<div class="gold-author">u/${esc(gc.author)}</div>` : ''}
